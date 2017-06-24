@@ -1,5 +1,3 @@
-//name: Cesar Loya
-
 //3350
 //program: walk.cpp
 //author:  Gordon Griesel
@@ -52,7 +50,7 @@ void checkResize(XEvent *e);
 void checkMouse(XEvent *e);
 void checkKeys(XEvent *e);
 void init();
-void physics(void);
+//void physics(void);
 void render(void);
 
 //-----------------------------------------------------------------------------
@@ -86,7 +84,6 @@ public:
 	int xres, yres;
 	int walk;
 	int walkFrame;
-	char keys[65536]; //modified in class
 	double delay;
 	Ppmimage *walkImage;
 	GLuint walkTexture;
@@ -104,7 +101,6 @@ public:
 			box[i][1] = rnd() * (yres-220) + 220.0;
 			box[i][2] = 0.0;
 		}
-		memset(keys, 0, 65536);
 	}
 } gl;
 
@@ -121,7 +117,7 @@ int main(void)
 			checkMouse(&e);
 			checkKeys(&e);
 		}
-		physics();
+		//physics();
 		render();
 		glXSwapBuffers(dpy, win);
 	}
@@ -136,24 +132,20 @@ void cleanupXWindows(void)
 	XCloseDisplay(dpy);
 }
 
-void setTitle(void)
-{
-	//Set the window title bar.
-	XMapWindow(dpy, win);
-	XStoreName(dpy, win, "3350 - Walk Cycle");
-}
-
+/*
 void setupScreenRes(const int w, const int h)
 {
 	gl.xres = w;
 	gl.yres = h;
 }
+*/
 
 void initXWindows(void)
 {
 	GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
+	//GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, None };
 	XSetWindowAttributes swa;
-	setupScreenRes(gl.xres, gl.yres);
+	//setupScreenRes(gl.xres, gl.yres);
 	dpy = XOpenDisplay(NULL);
 	if (dpy == NULL) {
 		printf("\n\tcannot connect to X server\n\n");
@@ -174,19 +166,8 @@ void initXWindows(void)
 							CWColormap | CWEventMask, &swa);
 	GLXContext glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
 	glXMakeCurrent(dpy, win, glc);
-	setTitle();
 }
 
-void reshapeWindow(int width, int height)
-{
-	//resized.
-	setupScreenRes(width, height);
-	glViewport(0, 0, (GLint)width, (GLint)height);
-	glMatrixMode(GL_PROJECTION); glLoadIdentity();
-	glMatrixMode(GL_MODELVIEW); glLoadIdentity();
-	glOrtho(0, gl.xres, 0, gl.yres, -1, 1);
-	setTitle();
-}
 
 unsigned char *buildAlphaData(Ppmimage *img)
 {
@@ -242,7 +223,7 @@ void initOpengl(void)
 	//
 	//load the images file into a ppm structure.
 	//
-	system("convert ./images/walk.gif ./images/walk.ppm");
+	system("convert ./images/Enemy_Mariachi_3.gif ./images/walk.ppm");
 	gl.walkImage = ppm6GetImage("./images/walk.ppm");
 	int w = gl.walkImage->width;
 	int h = gl.walkImage->height;
@@ -276,14 +257,13 @@ void checkResize(XEvent *e)
 	XConfigureEvent xce = e->xconfigure;
 	if (xce.width != gl.xres || xce.height != gl.yres) {
 		//Window size did change.
-		reshapeWindow(xce.width, xce.height);
 	}
 }
 
 void init() {
 
 }
-
+/*
 void checkMouse(XEvent *e)
 {
 	//Did the mouse move?
@@ -308,48 +288,20 @@ void checkMouse(XEvent *e)
 		savey = e->xbutton.y;
 	}
 }
+*/
 
-void screenCapture() {
-    static int num=0;
-    unsigned char *data = new unsigned char[gl.xres*gl.yres*3];
-    glReadPixels(0, 0, gl.xres, gl.yres, GL_RGB, GL_UNSIGNED_BYTE, data);
-
-    char ts[64];
-    sprintf(ts, "pic%03i.ppm", num++);
-    FILE * fpo = fopen(ts, "w");
-    if (fpo) {
-	fprintf(fpo, "P6\n");
-	fprintf(fpo, "%i %i\n", gl.xres, gl.yres);
-	fprintf(fpo, "255\n");
-	unsigned char *p = data;
-	p += ((gl.yres-1) * gl.xres*3);
-	//for (int i=0; i < (gl.xres*gl.yres*3); i++) 
-	//    fprintf(fpo, "%c", *(data+i));
-	for (int i=0; i < gl.yres; i++){
-	    for (int j=0; j < (gl.xres*3); j++) { 
-		fprintf(fpo, "%c", *(p+j));
-	    }
-	    p = p - (gl.xres*3);
-	}
-	fclose(fpo);
-    }
-    delete [] data;
-
-}
-
+/*
 void checkKeys(XEvent *e)
 {
 	//keyboard input?
 	static int shift=0;
-	int key = XLookupKeysym(&e->xkey, 0);
+	int key = (XLookupKeysym(&e->xkey, 0) & 0x0000ffff);
 	if (e->type == KeyRelease) {
-			gl.keys[key]=0;
 		if (key == XK_Shift_L || key == XK_Shift_R)
 			shift=0;
 		return;
 	}
 	if (e->type == KeyPress) {
-			gl.keys[key]=1;
 		if (key == XK_Shift_L || key == XK_Shift_R) {
 			shift=1;
 			return;
@@ -359,10 +311,6 @@ void checkKeys(XEvent *e)
 	}
 	if (shift) {}
 	switch (key) {
-		case XK_s:
-		        //screen capture
-		    	screenCapture();
-			break;
 		case XK_w:
 			timers.recordTime(&timers.walkTime);
 			gl.walk ^= 1;
@@ -388,7 +336,10 @@ void checkKeys(XEvent *e)
 			break;
 	}
 }
+*/
 
+
+// idk for now 
 Flt VecNormalize(Vec vec)
 {
 	Flt len, tlen;
@@ -407,10 +358,10 @@ Flt VecNormalize(Vec vec)
 	vec[2] = zlen * tlen;
 	return(len);
 }
-
+/*
 void physics(void)
 {
-	if (gl.walk || gl.keys[XK_Right] || gl.keys[XK_Left]) {
+	if (gl.walk) {
 		//man is walking...
 		//when time is up, advance the frame.
 		timers.recordTime(&timers.timeCurrent);
@@ -422,20 +373,16 @@ void physics(void)
 				gl.walkFrame -= 16;
 			timers.recordTime(&timers.walkTime);
 		}
-        //Wall goes to the right when man walks to the right
 		for (int i=0; i<20; i++) {
-		    if (gl.keys[XK_Left]) {
-			gl.box[i][0] += 2.0 * (0.05 / gl.delay);
-			if (gl.box[i][0] > gl.xres + 10.0)
-				gl.box[i][0] -= gl.xres + 10.0;
-		    } else {
 			gl.box[i][0] -= 2.0 * (0.05 / gl.delay);
 			if (gl.box[i][0] < -10.0)
 				gl.box[i][0] += gl.xres + 10.0;
-		    }
 		}
 	}
 }
+*/
+
+
 void render(void)
 {
 	Rect r;
@@ -447,32 +394,29 @@ void render(void)
 	//
 	//show ground
 	glBegin(GL_QUADS);
-		//51 , 255, 51
-		glColor3f(51, 255, 51); //..2 three times
+		glColor3f(0.2, 0.2, 0.2);
 		glVertex2i(0,       220);
 		glVertex2i(gl.xres, 220);
-		glColor3f(0, 204, 0); // .4 .. three times
-		//makes floor green
+		glColor3f(0.4, 0.4, 0.4);
 		glVertex2i(gl.xres,   0);
 		glVertex2i(0,         0);
 	glEnd();
 	//
 	//fake shadow
-	glColor3f(0.25, 0.25, 0.25);
-	glBegin(GL_QUADS);
-		glVertex2i(cx-60, 150);
-		glVertex2i(cx+50, 150);
-		glVertex2i(cx+50, 130);
-		glVertex2i(cx-60, 130);
-	glEnd();
+	//glColor3f(0.25, 0.25, 0.25);
+	//glBegin(GL_QUADS);
+	//	glVertex2i(cx-60, 150);
+	//	glVertex2i(cx+50, 150);
+	//	glVertex2i(cx+50, 130);
+	//	glVertex2i(cx-60, 130);
+	//glEnd();
 	//
 	//show boxes as background
+/*
 	for (int i=0; i<20; i++) {
 		glPushMatrix();
 		glTranslated(gl.box[i][0],gl.box[i][1],gl.box[i][2]);
-		
-		glColor3f(255, 255, 0);
-		//makes blocks YELLOW
+		glColor3f(0.2, 0.2, 0.2);
 		glBegin(GL_QUADS);
 			glVertex2i( 0,  0);
 			glVertex2i( 0, 30);
@@ -481,45 +425,33 @@ void render(void)
 		glEnd();
 		glPopMatrix();
 	}
-	float h = 200.0;
+*/
+	float h = 100.0; //was 200
 	float w = h * 0.5;
 	glPushMatrix();
-	glColor3f(255, 0, 0); //1.0
+	glColor3f(1.0, 1.0, 1.0);
 	glBindTexture(GL_TEXTURE_2D, gl.walkTexture);
+
 	//
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.0f);
-	//there is some color here
-	// does not work when you mess with this
 	glColor4ub(255,255,255,255);
 	int ix = gl.walkFrame % 8;
 	int iy = 0;
 	if (gl.walkFrame >= 8)
 		iy = 1;
-	float tx = (float)ix / 8.0;
-	float ty = (float)iy / 2.0;
-	
-    glBegin(GL_QUADS);
-    //Man has ability to walk right
-
-    if(gl.keys[XK_Left]){
-
-		glTexCoord2f(tx+.125,      ty+.5); glVertex2i(cx-w, cy-h);
-		glTexCoord2f(tx+.125,      ty);    glVertex2i(cx-w, cy+h);
-		glTexCoord2f(tx, ty);    glVertex2i(cx+w, cy+h);
-		glTexCoord2f(tx, ty+.5); glVertex2i(cx+w, cy-h);
-    } else {
-
-		glTexCoord2f(tx,      ty+.5); glVertex2i(cx-w, cy-h);
+	float tx = (float)ix / 7.0;
+	float ty = (float)iy / 1.0;
+	glBegin(GL_QUADS);
+		glTexCoord2f(tx,      ty+.8); glVertex2i(cx-w, cy-h);
 		glTexCoord2f(tx,      ty);    glVertex2i(cx-w, cy+h);
-		glTexCoord2f(tx+.125, ty);    glVertex2i(cx+w, cy+h);
-		glTexCoord2f(tx+.125, ty+.5); glVertex2i(cx+w, cy-h);
-    }
+		glTexCoord2f(tx+.142, ty);    glVertex2i(cx+w, cy+h);
+		glTexCoord2f(tx+.142, ty+.8); glVertex2i(cx+w, cy-h);
 	glEnd();
 	glPopMatrix();
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_ALPHA_TEST);
-
+	//
 	unsigned int c = 0x00ffff44;
 	r.bot = gl.yres - 20;
 	r.left = 10;
@@ -529,9 +461,12 @@ void render(void)
 	ggprint8b(&r, 16, c, "-   slower");
 	ggprint8b(&r, 16, c, "right arrow -> walk right");
 	ggprint8b(&r, 16, c, "left arrow  <- walk left");
-	ggprint8b(&r, 16, c, "S - Screen print");
 	ggprint8b(&r, 16, c, "frame: %i", gl.walkFrame);
 }
+
+
+
+
 
 
 
